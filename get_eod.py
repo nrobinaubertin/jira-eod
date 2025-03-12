@@ -30,9 +30,10 @@ response = requests.request(
     auth=auth,
 )
 
-datetime_cutoff = datetime.now(timezone.utc) - timedelta(hours=18*int(sys.argv[1]))
+datetime_cutoff = datetime.now(timezone.utc) - timedelta(hours=18 * int(sys.argv[1]))
 
 issues = json.loads(response.text)["issues"]
+
 
 def parse_content(content):
     text = ""
@@ -45,13 +46,8 @@ def parse_content(content):
             if "marks" in elem and any(
                 mark["type"] == "link" for mark in elem["marks"]
             ):
-                link = next(
-                    mark for mark in elem["marks"] if mark["type"] == "link"
-                )
-                text += (
-                    f"[{elem['text']}]({link['attrs']['href']})".strip()
-                    + " "
-                )
+                link = next(mark for mark in elem["marks"] if mark["type"] == "link")
+                text += f"[{elem['text']}]({link['attrs']['href']})".strip() + " "
             else:
                 text += elem["text"].strip() + " "
         elif "type" in elem and elem["type"] == "inlineCard":
@@ -70,6 +66,10 @@ def parse_block(block):
     elif "type" in block and block["type"] == "bulletList":
         for item in block["content"]:
             text += "  - " + parse_content(item["content"][0]["content"]) + "\n"
+    elif "type" in block and block["type"] == "heading":
+        level = block.get("attrs", {}).get("level", 1)
+        heading_text = parse_content(block.get("content", [])).strip()
+        text += f"{'#' * level} {heading_text}\n"
     return text
 
 
