@@ -30,7 +30,8 @@ response = requests.request(
     auth=auth,
 )
 
-datetime_cutoff = datetime.now(timezone.utc) - timedelta(hours=18 * int(sys.argv[1]))
+number_of_days = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+datetime_cutoff = datetime.now(timezone.utc) - timedelta(hours=18 * number_of_days)
 
 issues = json.loads(response.text)["issues"]
 
